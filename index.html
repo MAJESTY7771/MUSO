@@ -1,543 +1,171 @@
 <!DOCTYPE html>
-<html lang="uz" class="dark">
+<html lang="uz">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AURA PAY — Apple Pay Mobile Wallet</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        apple: {
-                            black: '#000000',
-                            card: '#1c1c1e',
-                            subcard: '#2c2c2e',
-                            blue: '#0a84ff',
-                            green: '#30d158',
-                            purple: '#bf5af2',
-                            gold: '#ffd60a',
-                            red: '#ff453a'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Inter', 'sans-serif']
-                    },
-                    boxShadow: {
-                        'apple-glow': '0 0 50px -10px rgba(10, 132, 255, 0.4)',
-                        'green-glow': '0 0 50px -10px rgba(48, 209, 88, 0.5)',
-                        'purple-glow': '0 0 50px -10px rgba(191, 90, 242, 0.4)',
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Confetti FX -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        body {
-            background-color: #000000;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-
-        /* Apple Glassmorphism */
-        .glass-wallet {
-            background: rgba(28, 28, 30, 0.75);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-        }
-
-        /* Card Gradients */
-        .card-titanium {
-            background: linear-gradient(135deg, #3a3d40 0%, #181719 100%);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-        .card-black {
-            background: linear-gradient(135deg, #111111 0%, #2c2c2e 100%);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        .card-gold {
-            background: linear-gradient(135deg, #fce055 0%, #d8a027 100%);
-            color: #111;
-        }
-
-        /* Scanning Laser FX */
-        @keyframes laserLine {
-            0% { top: 5%; opacity: 0.8; }
-            50% { top: 90%; opacity: 1; }
-            100% { top: 5%; opacity: 0.8; }
-        }
-        .laser-scanner {
-            position: absolute;
-            left: 0; right: 0; height: 3px;
-            background: linear-gradient(90deg, transparent, #30d158, #0a84ff, transparent);
-            box-shadow: 0 0 15px #30d158, 0 0 25px #0a84ff;
-            animation: laserLine 2s infinite ease-in-out;
-        }
-
-        /* NFC Ripple Wave FX */
-        @keyframes rippleWave {
-            0% { transform: scale(0.8); opacity: 0.9; }
-            100% { transform: scale(2.2); opacity: 0; }
-        }
-        .nfc-wave-ring {
-            animation: rippleWave 2s infinite cubic-bezier(0.1, 0.8, 0.3, 1);
-        }
-
-        /* Hide Scrollbar */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AURA Pay — Mobile Wallet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Haqiqiy kamera orqali QR skanerlash kutubxonasi -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
+    body { font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif; background: #000000; color: #ffffff; user-select: none; }
+    .glass-card { background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.12); }
+    .card-gradient-1 { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.15); }
+    .card-gradient-2 { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); }
+    #reader video { border-radius: 20px; object-fit: cover; }
+  </style>
 </head>
-<body class="text-white font-sans min-h-screen antialiased flex flex-col justify-between overflow-x-hidden selection:bg-apple-blue">
+<body class="min-h-screen flex flex-col justify-between p-5 max-w-md mx-auto">
 
-    <!-- Top Status Header -->
-    <header class="px-6 pt-5 pb-3 sticky top-0 z-30 bg-black/80 backdrop-blur-md flex justify-between items-center border-b border-white/10">
-        <div class="flex items-center space-x-2.5">
-            <div class="w-8 h-8 rounded-xl bg-apple-blue flex items-center justify-center shadow-apple-glow">
-                <i data-lucide="wallet" class="w-4 h-4 text-white"></i>
-            </div>
-            <div>
-                <h1 class="text-base font-bold tracking-tight text-white flex items-center gap-1.5">
-                    Apple Pay <span class="text-[10px] bg-white/10 text-apple-blue px-2 py-0.5 rounded-full font-mono">Aura Wallet</span>
-                </h1>
-            </div>
+  <!-- Header / Top Bar -->
+  <header class="flex justify-between items-center py-2">
+    <div class="flex items-center space-x-2">
+      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm"></div>
+      <span class="font-semibold tracking-wide text-sm">AURA PAY</span>
+    </div>
+    <div class="text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+      Xavfsiz Tokenizatsiya
+    </div>
+  </header>
+
+  <!-- Apple Wallet Kartasi -->
+  <div class="my-6 space-y-4">
+    <div class="card-gradient-1 rounded-3xl p-6 h-52 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+      <div class="flex justify-between items-start">
+        <div>
+          <p class="text-xs text-gray-400 font-medium">Karta balans</p>
+          <h2 class="text-2xl font-bold mt-0.5">14,850,000 UZS</h2>
         </div>
+        <span class="font-bold text-lg italic text-blue-400">VISA</span>
+      </div>
 
-        <div class="flex items-center space-x-2">
-            <span id="syncIndicator" class="flex items-center gap-1.5 text-[11px] font-mono bg-apple-green/10 text-apple-green border border-apple-green/20 px-2.5 py-1 rounded-full">
-                <span class="w-1.5 h-1.5 rounded-full bg-apple-green animate-ping"></span> Terminal Linked
-            </span>
+      <div class="space-y-1">
+        <p class="font-mono text-sm tracking-widest text-gray-300">•••• •••• •••• 8842</p>
+        <div class="flex justify-between text-[10px] text-gray-400 uppercase">
+          <span>DAN Token: 4092-DAN-8842</span>
+          <span>09/28</span>
         </div>
-    </header>
+      </div>
+    </div>
+  </div>
 
-    <!-- Main Wallet Experience -->
-    <main class="flex-1 px-5 py-4 max-w-md mx-auto w-full space-y-5 flex flex-col">
+  <!-- Boshqaruv Tugmasi -->
+  <div class="space-y-3 mb-6">
+    <button onclick="startScanner()" class="w-full py-4 bg-white text-black font-semibold rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m0 14v1m8-8h1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path></svg>
+      <span>QR Skanerlash (Kamera)</span>
+    </button>
+  </div>
 
-        <!-- Active Merchant Connection Card -->
-        <div id="merchantInfoCard" class="glass-wallet rounded-2xl p-4 border border-apple-blue/30 bg-gradient-to-r from-apple-blue/10 to-transparent flex justify-between items-center">
-            <div>
-                <p class="text-[10px] uppercase font-bold tracking-wider text-apple-blue">Active Terminal Session</p>
-                <h2 id="merchantTitle" class="text-sm font-semibold text-white">MacBook Pro 16 M3 Max</h2>
-                <p id="merchantSessionId" class="text-[11px] font-mono text-gray-400">Session: #AURA-8821</p>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] uppercase text-gray-400">Amount Due</p>
-                <p id="merchantAmount" class="text-xl font-bold font-mono text-apple-green">$2,499.00</p>
-            </div>
-        </div>
-
-        <!-- Interactive Stacked Wallet Cards Container -->
-        <div class="space-y-2">
-            <div class="flex justify-between items-center px-1">
-                <span class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Payment Cards</span>
-                <span class="text-xs text-apple-blue font-medium cursor-pointer" onclick="cycleCard()">Tap Card to Switch</span>
-            </div>
-
-            <!-- Card Visual Representation -->
-            <div id="activeCardFrame" onclick="cycleCard()" class="w-full h-52 rounded-3xl p-6 card-titanium flex flex-col justify-between relative overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-[1.01] active:scale-95">
-                
-                <!-- Glass ambient shine -->
-                <div class="absolute -right-12 -top-12 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
-
-                <div class="flex justify-between items-start z-10">
-                    <div>
-                        <p id="cardBank" class="text-xs font-bold uppercase tracking-widest text-gray-200">KAPITALBANK VISA</p>
-                        <p class="text-[10px] text-gray-400">Infinite Contactless DAN</p>
-                    </div>
-                    <i data-lucide="contactless" class="w-7 h-7 text-white/90"></i>
-                </div>
-
-                <div class="z-10 my-1">
-                    <div class="w-11 h-8 bg-amber-300/20 border border-amber-300/40 rounded-lg mb-2 flex items-center justify-center">
-                        <div class="w-7 h-5 border border-amber-400/40 rounded"></div>
-                    </div>
-                    <p id="cardNumber" class="font-mono text-lg tracking-widest text-white">•••• •••• •••• 9924</p>
-                </div>
-
-                <div class="flex justify-between items-end z-10">
-                    <div>
-                        <p class="text-[9px] uppercase text-gray-400">Cardholder Name</p>
-                        <p id="cardHolder" class="text-xs font-medium tracking-wide">ALEKSANDR V.</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[9px] uppercase text-gray-400">Card Balance</p>
-                        <p id="cardBalance" class="text-base font-bold font-mono text-apple-green">$5,420.50</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Trigger Control Buttons -->
-        <div class="grid grid-cols-2 gap-3 pt-2">
-            <button onclick="openNFCScanner()" class="py-4 bg-apple-subcard hover:bg-white/15 border border-white/10 rounded-2xl flex flex-col items-center justify-center transition active:scale-95 shadow-lg group">
-                <i data-lucide="smartphone-charging" class="w-6 h-6 text-apple-purple mb-1.5 group-hover:scale-110 transition"></i>
-                <span class="text-xs font-semibold text-white">NFC Tap Mode</span>
-                <span class="text-[10px] text-gray-400 mt-0.5">Hold phone back to terminal</span>
-            </button>
-
-            <button onclick="openQRCamera()" class="py-4 bg-apple-subcard hover:bg-white/15 border border-white/10 rounded-2xl flex flex-col items-center justify-center transition active:scale-95 shadow-lg group">
-                <i data-lucide="scan-line" class="w-6 h-6 text-apple-blue mb-1.5 group-hover:scale-110 transition"></i>
-                <span class="text-xs font-semibold text-white">Scan QR Code</span>
-                <span class="text-[10px] text-gray-400 mt-0.5">Point camera at POS screen</span>
-            </button>
-        </div>
-
-        <!-- Security Badge info -->
-        <div class="glass-wallet p-4 rounded-2xl border border-white/5 space-y-2 text-xs">
-            <div class="flex items-center space-x-2 text-apple-green font-semibold">
-                <i data-lucide="shield-check" class="w-4 h-4"></i>
-                <span>Apple Secure Enclave Active</span>
-            </div>
-            <p class="text-gray-400 text-[11px] leading-relaxed">
-                Primary card numbers (FPAN) are never transmitted or stored on merchants. Transactions are signed using Device Account Numbers (DAN) & HMAC SHA-256 tokens.
-            </p>
-        </div>
-
-        <!-- Wallet Recent Activity Ledger -->
-        <div class="flex-1 space-y-2">
-            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Wallet History</p>
-            <div id="walletHistoryList" class="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
-                <!-- Items added dynamically -->
-            </div>
-        </div>
-
-    </main>
-
-
-    <!-- MODAL OVERLAY 1: SIMULATED NFC TAP PROXIMITY SCREEN -->
-    <div id="nfcModal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 p-6 flex flex-col justify-between hidden">
-        <div class="flex justify-between items-center">
-            <span class="text-xs font-mono text-gray-400">NFC Field Active (13.56 MHz)</span>
-            <button onclick="closeModal('nfcModal')" class="p-2 text-gray-400 hover:text-white">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-
-        <div class="flex flex-col items-center justify-center text-center my-auto space-y-6">
-            <div class="relative w-32 h-32 flex items-center justify-center">
-                <div class="absolute inset-0 bg-apple-purple/20 rounded-full nfc-wave-ring"></div>
-                <div class="w-24 h-24 bg-gradient-to-tr from-apple-purple to-apple-blue rounded-full flex items-center justify-center shadow-purple-glow">
-                    <i data-lucide="contactless" class="w-12 h-12 text-white"></i>
-                </div>
-            </div>
-
-            <div>
-                <h3 class="text-xl font-bold text-white">Ready to Tap Terminal</h3>
-                <p class="text-xs text-gray-400 mt-1 max-w-xs">Hold top of iPhone near POS terminal screen or tap button below to simulate proximity</p>
-            </div>
-
-            <button onclick="triggerFaceIDPrompt('NFC Contactless Tap')" class="w-full max-w-xs py-4 bg-gradient-to-r from-apple-purple to-apple-blue text-white rounded-2xl font-bold text-sm shadow-apple-glow">
-                Simulate NFC Contactless Touch
-            </button>
-        </div>
-
-        <p class="text-center text-[11px] text-gray-500 font-mono">Encrypted NFC Cryptogram Ready</p>
+  <!-- Real-Time Camera QR Scanner Modal -->
+  <div id="scannerModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex flex-col justify-between p-6">
+    <div class="flex justify-between items-center">
+      <h3 class="font-semibold text-lg">QR Kodni Skanerlang</h3>
+      <button onclick="stopScanner()" class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-gray-400">✕</button>
     </div>
 
-
-    <!-- MODAL OVERLAY 2: CAMERA / QR SCANNER SCREEN -->
-    <div id="qrModal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 p-6 flex flex-col justify-between hidden">
-        <div class="flex justify-between items-center">
-            <span class="text-xs font-mono text-gray-400">Aura Camera Pay Viewfinder</span>
-            <button onclick="closeModal('qrModal')" class="p-2 text-gray-400 hover:text-white">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-
-        <!-- Viewfinder -->
-        <div class="flex flex-col items-center justify-center my-auto space-y-4">
-            <div class="w-64 h-64 border-2 border-apple-blue rounded-3xl relative overflow-hidden flex items-center justify-center bg-gray-950">
-                <div class="laser-scanner"></div>
-                <p class="text-xs text-gray-400 text-center px-6">Align Terminal Checkout QR Code inside square</p>
-            </div>
-
-            <button onclick="triggerFaceIDPrompt('Apple Pay QR')" class="px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 text-white rounded-xl text-xs font-semibold">
-                Simulate Instant QR Capture
-            </button>
-        </div>
-
-        <p class="text-center text-[11px] text-gray-500 font-mono">Auto Scan Enabled</p>
+    <div class="w-full max-w-sm mx-auto my-auto overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
+      <div id="reader"></div>
     </div>
 
+    <p class="text-center text-xs text-gray-400">Terminal ekranidagi QR kodni kvadrat ichiga kiriting</p>
+  </div>
 
-    <!-- MODAL OVERLAY 3: FACE ID BIOMETRIC AUTHORIZATION -->
-    <div id="faceIdModal" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-50 p-6 flex flex-col justify-between hidden">
-        <div class="text-center pt-8">
-            <div id="faceIdIconBox" class="w-20 h-20 mx-auto rounded-3xl bg-apple-blue/10 border border-apple-blue/30 flex items-center justify-center mb-3 shadow-apple-glow transition-all duration-300">
-                <i data-lucide="scan-face" class="w-10 h-10 text-apple-blue animate-pulse"></i>
-            </div>
-            <h3 id="faceIdHeader" class="text-xl font-bold text-white">Apple Pay</h3>
-            <p id="faceIdSubheader" class="text-xs text-gray-400 mt-1">Double Click Side Button or Confirm FaceID</p>
-        </div>
-
-        <!-- Transaction Details Card -->
-        <div class="glass-wallet p-5 rounded-3xl space-y-3 border border-white/10">
-            <div class="flex justify-between text-xs">
-                <span class="text-gray-400">Merchant</span>
-                <span id="bioMerchantText" class="font-semibold text-white">MacBook Pro 16 M3 Max</span>
-            </div>
-            <div class="flex justify-between text-xs">
-                <span class="text-gray-400">Total Amount</span>
-                <span id="bioAmountText" class="font-bold text-white font-mono text-sm">$2,499.00</span>
-            </div>
-            <div class="flex justify-between text-xs pt-3 border-t border-white/10">
-                <span class="text-gray-400">Selected Card Token</span>
-                <span id="bioCardToken" class="font-mono text-apple-blue text-xs">DAN •••• 9924</span>
-            </div>
-        </div>
-
-        <div class="space-y-3">
-            <button id="btnAuthorize" onclick="executeAuthAndSend()" class="w-full py-4 bg-apple-blue hover:bg-blue-600 text-white font-bold text-sm rounded-2xl shadow-apple-glow transition flex items-center justify-center gap-2">
-                <i data-lucide="fingerprint" class="w-5 h-5"></i> Confirm with FaceID
-            </button>
-            <button onclick="closeModal('faceIdModal')" class="w-full py-2 text-xs text-gray-400 hover:text-white transition text-center">
-                Cancel Payment
-            </button>
-        </div>
+  <!-- FaceID / To'lovni Tasdiqlash Modal -->
+  <div id="payModal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 hidden flex flex-col justify-between p-6">
+    <div class="text-center pt-8">
+      <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Toʻlov soʻrovi</p>
+      <h2 id="modalAmount" class="text-4xl font-bold text-white mb-2">0 UZS</h2>
+      <p id="modalSession" class="text-xs text-blue-400 font-mono"></p>
     </div>
 
-
-    <!-- MODAL OVERLAY 4: PAYMENT SUCCESS RECEIPT -->
-    <div id="successModal" class="fixed inset-0 bg-black z-50 p-6 flex flex-col justify-between text-center hidden">
-        <div class="my-auto space-y-6 flex flex-col items-center">
-            <div class="w-24 h-24 rounded-full bg-apple-green/20 border border-apple-green flex items-center justify-center text-apple-green shadow-green-glow">
-                <i data-lucide="check" class="w-12 h-12 stroke-[3]"></i>
-            </div>
-            
-            <div>
-                <p class="text-xs uppercase text-gray-400 font-mono tracking-wider">Payment Approved</p>
-                <h2 id="successAmountText" class="text-3xl font-bold font-mono text-white mt-1">$2,499.00</h2>
-                <p id="successMerchantText" class="text-xs text-gray-300 mt-1">MacBook Pro 16 M3 Max</p>
-            </div>
-
-            <div class="w-full glass-wallet p-4 rounded-2xl text-left text-xs space-y-2 font-mono border border-white/10">
-                <div class="flex justify-between">
-                    <span class="text-gray-400">Cryptogram:</span>
-                    <span id="successCryptogram" class="text-apple-purple font-bold">0x4F92...A8B1</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">Device Token:</span>
-                    <span class="text-white">DAN-881920</span>
-                </div>
-                <div class="flex justify-between">
-                    <span class="text-gray-400">POS Terminal Status:</span>
-                    <span class="text-apple-green font-bold">SETTLED (Sync)</span>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="closeModal('successModal')" class="w-full py-4 bg-white/10 hover:bg-white/20 text-white font-bold rounded-2xl text-xs transition">
-            Done
-        </button>
+    <!-- FaceID Animatsiyasi -->
+    <div class="my-auto text-center space-y-4">
+      <div class="w-24 h-24 border-2 border-blue-500/40 rounded-3xl mx-auto flex items-center justify-center relative overflow-hidden">
+        <svg class="w-12 h-12 text-blue-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+      </div>
+      <p class="text-xs text-gray-400">FaceID orqali autentifikatsiya</p>
     </div>
 
+    <div class="space-y-3 pb-4">
+      <button onclick="confirmPayment()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 font-semibold rounded-2xl shadow-lg shadow-blue-600/30 transition text-white">
+        Toʻlovni tasdiqlash
+      </button>
+      <button onclick="cancelPayment()" class="w-full py-3 text-gray-400 text-sm">Bekor qilish</button>
+    </div>
+  </div>
 
-    <!-- JAVASCRIPT WALLET LOGIC -->
-    <script>
-        // State Management
-        const state = {
-            cards: [
-                { id: 'card1', bank: 'KAPITALBANK VISA', number: '•••• •••• •••• 9924', cardholder: 'ALEKSANDR V.', balance: 5420.50, style: 'card-titanium', dan: 'DAN-9924' },
-                { id: 'card2', bank: 'HAMKORBANK MASTERCARD', number: '•••• •••• •••• 4102', cardholder: 'ALEKSANDR V.', balance: 2800.00, style: 'card-black', dan: 'DAN-4102' },
-                { id: 'card3', bank: 'UZUM BANK VISA GOLD', number: '•••• •••• •••• 7711', cardholder: 'ALEKSANDR V.', balance: 12400.00, style: 'card-gold', dan: 'DAN-7711' }
-            ],
-            selectedCardIndex: 0,
-            activeMerchant: {
-                sessionId: 'AURA-8821',
-                itemName: 'MacBook Pro 16 M3 Max',
-                amount: 2499.00
-            },
-            currentPayType: 'NFC Contactless',
-            history: []
-        };
+  <script>
+    const channel = new BroadcastChannel('aura_pay_channel');
+    let html5QrcodeScanner = null;
+    let pendingSession = null;
 
-        // Real-Time Inter-Tab Communication via BroadcastChannel API
-        const payChannel = new BroadcastChannel('aura_pay_channel');
+    function startScanner() {
+      document.getElementById('scannerModal').classList.remove('hidden');
+      html5QrcodeScanner = new Html5Qrcode("reader");
 
-        window.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
-            updateCardUI();
+      html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        onScanSuccess
+      ).catch(err => {
+        alert("Kamerani ochishda xatolik: " + err);
+        stopScanner();
+      });
+    }
 
-            // Request active terminal session from open POS terminal
-            payChannel.postMessage({ type: 'REQUEST_TERMINAL_SESSION' });
-
-            // Listen for terminal updates
-            payChannel.onmessage = (event) => {
-                const data = event.data;
-                if (data.type === 'TERMINAL_SESSION_UPDATED' || data.type === 'TERMINAL_SESSION_RESPONSE') {
-                    if (data.payload) {
-                        state.activeMerchant = data.payload;
-                        updateMerchantUI();
-                    }
-                } else if (data.type === 'PAYMENT_APPROVED') {
-                    // Confirmed by terminal
-                }
-            };
+    function stopScanner() {
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+          document.getElementById('scannerModal').classList.add('hidden');
+        }).catch(() => {
+          document.getElementById('scannerModal').classList.add('hidden');
         });
+      } else {
+        document.getElementById('scannerModal').classList.add('hidden');
+      }
+    }
 
-        // Cycle Cards
-        function cycleCard() {
-            state.selectedCardIndex = (state.selectedCardIndex + 1) % state.cards.length;
-            updateCardUI();
-            if (navigator.vibrate) navigator.vibrate(30);
+    function onScanSuccess(decodedText) {
+      try {
+        const data = JSON.parse(decodedText);
+        if (data.sessionId && data.amount) {
+          pendingSession = data;
+          stopScanner();
+
+          document.getElementById('modalAmount').innerText = data.amount.toLocaleString('uz-UZ') + ' UZS';
+          document.getElementById('modalSession').innerText = 'ID: ' + data.sessionId;
+          document.getElementById('payModal').classList.remove('hidden');
         }
+      } catch (e) {
+        // Shunchaki format mos kelmagan QR kodlar bo'lsa o'tkazib yuboradi
+      }
+    }
 
-        function updateCardUI() {
-            const card = state.cards[state.selectedCardIndex];
-            const frame = document.getElementById('activeCardFrame');
-            
-            frame.className = `w-full h-52 rounded-3xl p-6 ${card.style} flex flex-col justify-between relative overflow-hidden shadow-2xl transition-all duration-500 cursor-pointer transform hover:scale-[1.01] active:scale-95`;
-            document.getElementById('cardBank').innerText = card.bank;
-            document.getElementById('cardNumber').innerText = card.number;
-            document.getElementById('cardHolder').innerText = card.cardholder;
-            document.getElementById('cardBalance').innerText = '$' + card.balance.toLocaleString('en-US', { minimumFractionDigits: 2 });
-        }
+    function confirmPayment() {
+      if (!pendingSession) return;
 
-        function updateMerchantUI() {
-            document.getElementById('merchantTitle').innerText = state.activeMerchant.itemName;
-            document.getElementById('merchantAmount').innerText = '$' + state.activeMerchant.amount.toFixed(2);
-            document.getElementById('merchantSessionId').innerText = 'Session: #' + state.activeMerchant.id;
-        }
+      // Cryptogramma va Device Account Number (DAN) yaratish simulyatsiyasi (Apple Pay xavfsizlik standarti)
+      const token = 'DAN-4092-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-        // Modal Handlers
-        function openNFCScanner() {
-            document.getElementById('nfcModal').classList.remove('hidden');
-        }
+      // Noutbukdagi Aura Terminalga to'g'ridan-to'g'ri signal yuborish
+      channel.postMessage({
+        type: 'PAYMENT_SUCCESS',
+        sessionId: pendingSession.sessionId,
+        token: token,
+        timestamp: Date.now()
+      });
 
-        function openQRCamera() {
-            document.getElementById('qrModal').classList.remove('hidden');
-        }
+      document.getElementById('payModal').classList.add('hidden');
+      alert("Toʻlov muvaffaqiyatli amalga oshirildi!");
+      pendingSession = null;
+    }
 
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-        }
-
-        function triggerFaceIDPrompt(payType) {
-            state.currentPayType = payType;
-            closeModal('nfcModal');
-            closeModal('qrModal');
-
-            const card = state.cards[state.selectedCardIndex];
-            document.getElementById('bioMerchantText').innerText = state.activeMerchant.itemName;
-            document.getElementById('bioAmountText').innerText = '$' + state.activeMerchant.amount.toFixed(2);
-            document.getElementById('bioCardToken').innerText = `${card.bank} (${card.dan})`;
-
-            document.getElementById('faceIdModal').classList.remove('hidden');
-            if (navigator.vibrate) navigator.vibrate(60);
-        }
-
-        // Execute Biometric Verification & Send Payment Payload
-        function executeAuthAndSend() {
-            const btn = document.getElementById('btnAuthorize');
-            const iconBox = document.getElementById('faceIdIconBox');
-            const header = document.getElementById('faceIdHeader');
-            const subheader = document.getElementById('faceIdSubheader');
-
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Encrypting DAN Token...`;
-            lucide.createIcons();
-
-            // FaceID Animation Simulation
-            iconBox.className = "w-20 h-20 mx-auto rounded-3xl bg-apple-green/20 border border-apple-green flex items-center justify-center mb-3 shadow-green-glow transition-all duration-300";
-            iconBox.innerHTML = `<i data-lucide="check-circle" class="w-10 h-10 text-apple-green animate-bounce"></i>`;
-            header.innerText = "FaceID Verified";
-            subheader.innerText = "Generating HMAC SHA-256 Cryptogram...";
-            lucide.createIcons();
-
-            setTimeout(() => {
-                const card = state.cards[state.selectedCardIndex];
-
-                if (card.balance < state.activeMerchant.amount) {
-                    alert("Insufficient card balance!");
-                    closeModal('faceIdModal');
-                    btn.disabled = false;
-                    return;
-                }
-
-                // Deduct Balance
-                card.balance -= state.activeMerchant.amount;
-                updateCardUI();
-
-                const cryptogram = '0x' + Math.random().toString(16).substr(2, 8).toUpperCase();
-
-                // Send payment via BroadcastChannel to Aura Terminal
-                payChannel.postMessage({
-                    type: 'PAYMENT_SUBMITTED',
-                    payload: {
-                        sessionId: state.activeMerchant.id,
-                        itemName: state.activeMerchant.itemName,
-                        amount: state.activeMerchant.amount,
-                        cardToken: card.dan,
-                        payType: state.currentPayType,
-                        cryptogram: cryptogram
-                    }
-                });
-
-                // Add to Local Wallet History
-                const historyItem = {
-                    item: state.activeMerchant.itemName,
-                    amount: state.activeMerchant.amount,
-                    time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                };
-                state.history.unshift(historyItem);
-                renderHistory();
-
-                // Show Success Overlay
-                closeModal('faceIdModal');
-                
-                document.getElementById('successAmountText').innerText = '$' + state.activeMerchant.amount.toFixed(2);
-                document.getElementById('successMerchantText').innerText = state.activeMerchant.itemName;
-                document.getElementById('successCryptogram').innerText = cryptogram;
-
-                document.getElementById('successModal').classList.remove('hidden');
-
-                confetti({
-                    particleCount: 80,
-                    spread: 60,
-                    origin: { y: 0.7 }
-                });
-
-                if (navigator.vibrate) navigator.vibrate([80, 40, 120]);
-
-                // Reset Button State
-                btn.disabled = false;
-                btn.innerHTML = `<i data-lucide="fingerprint" class="w-5 h-5"></i> Confirm with FaceID`;
-
-            }, 1000);
-        }
-
-        function renderHistory() {
-            const container = document.getElementById('walletHistoryList');
-            container.innerHTML = '';
-
-            state.history.forEach(h => {
-                const el = document.createElement('div');
-                el.className = "flex justify-between items-center p-3 rounded-2xl glass-wallet text-xs";
-                el.innerHTML = `
-                    <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 rounded-xl bg-apple-blue/20 text-apple-blue flex items-center justify-center">
-                            <i data-lucide="shopping-bag" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-white">${h.item}</p>
-                            <p class="text-[10px] text-gray-400">${h.time}</p>
-                        </div>
-                    </div>
-                    <span class="font-mono font-bold text-white">-$${h.amount.toFixed(2)}</span>
-                `;
-                container.appendChild(el);
-            });
-            lucide.createIcons();
-        }
-    </script>
+    function cancelPayment() {
+      pendingSession = null;
+      document.getElementById('payModal').classList.add('hidden');
+    }
+  </script>
 </body>
 </html>
