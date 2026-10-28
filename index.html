@@ -1,123 +1,168 @@
 <!DOCTYPE html>
-<html lang="uz">
+<html lang="uz" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AURA Pay — Mobile Wallet</title>
+  <title>AURA PAY v2.0 — Mobile Wallet</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Haqiqiy kamera orqali QR skanerlash kutubxonasi -->
+  <!-- Real-Kamera orqali QR Skanerlash Kutubxonasi -->
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500;600;700&display=swap');
-    body { font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, sans-serif; background: #000000; color: #ffffff; user-select: none; }
-    .glass-card { background: rgba(255, 255, 255, 0.07); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.12); }
-    .card-gradient-1 { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid rgba(255,255,255,0.15); }
-    .card-gradient-2 { background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); }
-    #reader video { border-radius: 20px; object-fit: cover; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #030712;
+      color: #f9fafb;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .ultra-glass {
+      background: rgba(17, 24, 39, 0.5);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .card-black {
+      background: linear-gradient(135deg, #18181b 0%, #09090b 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    }
+    #reader video {
+      border-radius: 24px;
+      object-fit: cover;
+    }
+    .faceid-scanner-line {
+      background: linear-gradient(to bottom, transparent, #06b6d4, transparent);
+      animation: scan 1.5s infinite ease-in-out;
+    }
+    @keyframes scan {
+      0% { top: 0%; }
+      50% { top: 80%; }
+      100% { top: 0%; }
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between p-5 max-w-md mx-auto">
+<body class="min-h-screen flex flex-col justify-between p-6 max-w-md mx-auto relative overflow-x-hidden">
 
-  <!-- Header / Top Bar -->
-  <header class="flex justify-between items-center py-2">
-    <div class="flex items-center space-x-2">
-      <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center font-bold text-sm"></div>
-      <span class="font-semibold tracking-wide text-sm">AURA PAY</span>
+  <!-- Ambient background glow -->
+  <div class="fixed -top-32 -right-32 w-80 h-80 bg-cyan-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+  <div class="fixed -bottom-32 -left-32 w-80 h-80 bg-purple-500/15 rounded-full blur-[100px] pointer-events-none"></div>
+
+  <!-- Header -->
+  <header class="flex justify-between items-center py-2 z-10">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-cyan-500 to-purple-600 flex items-center justify-center font-black text-xl shadow-lg shadow-cyan-500/20">
+        
+      </div>
+      <div>
+        <h1 class="font-black tracking-tight text-base">AURA PAY</h1>
+        <p class="text-[10px] text-cyan-400 font-bold uppercase tracking-widest">Ultra Pass</p>
+      </div>
     </div>
-    <div class="text-xs text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-      Xavfsiz Tokenizatsiya
+    <div class="px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-[10px] font-bold tracking-wider uppercase">
+      Encrypted
     </div>
   </header>
 
-  <!-- Apple Wallet Kartasi -->
-  <div class="my-6 space-y-4">
-    <div class="card-gradient-1 rounded-3xl p-6 h-52 flex flex-col justify-between shadow-2xl relative overflow-hidden">
-      <div class="flex justify-between items-start">
+  <!-- Apple Style Card Wallet -->
+  <div class="my-auto space-y-6 z-10 py-6">
+    <div class="card-black rounded-[28px] p-7 h-56 flex flex-col justify-between relative overflow-hidden group">
+      <!-- Card ambient highlights -->
+      <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl"></div>
+      
+      <div class="flex justify-between items-start z-10">
         <div>
-          <p class="text-xs text-gray-400 font-medium">Karta balans</p>
-          <h2 class="text-2xl font-bold mt-0.5">14,850,000 UZS</h2>
+          <p class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Asosiy Karta Balansi</p>
+          <h2 class="text-3xl font-black tracking-tight mt-1 text-white font-mono">25,400,000 UZS</h2>
         </div>
-        <span class="font-bold text-lg italic text-blue-400">VISA</span>
+        <span class="font-black text-xl italic text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">VISA</span>
       </div>
 
-      <div class="space-y-1">
-        <p class="font-mono text-sm tracking-widest text-gray-300">•••• •••• •••• 8842</p>
-        <div class="flex justify-between text-[10px] text-gray-400 uppercase">
-          <span>DAN Token: 4092-DAN-8842</span>
-          <span>09/28</span>
+      <div class="space-y-2 z-10">
+        <p class="font-mono text-base tracking-widest text-gray-300 font-bold">•••• •••• •••• 9912</p>
+        <div class="flex justify-between items-center text-[10px] font-mono text-gray-400 uppercase tracking-wider">
+          <span>Token: 8820-DAN-9912</span>
+          <span>EXP: 12/29</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Boshqaruv Tugmasi -->
-  <div class="space-y-3 mb-6">
-    <button onclick="startScanner()" class="w-full py-4 bg-white text-black font-semibold rounded-2xl flex items-center justify-center space-x-2 shadow-lg active:scale-95 transition">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m0 14v1m8-8h1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path></svg>
-      <span>QR Skanerlash (Kamera)</span>
+  <!-- QR Scanner Triggers -->
+  <div class="space-y-4 z-10 mb-4">
+    <button onclick="openScanner()" class="w-full py-5 bg-gradient-to-r from-cyan-500 via-blue-600 to-indigo-600 hover:opacity-95 font-extrabold text-base rounded-2xl shadow-xl shadow-cyan-500/25 transition active:scale-[0.98] text-white flex items-center justify-center gap-3">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m0 14v1m8-8h1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707"></path></svg>
+      <span>QR KODNI SKANERLASH</span>
     </button>
   </div>
 
   <!-- Real-Time Camera QR Scanner Modal -->
-  <div id="scannerModal" class="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 hidden flex flex-col justify-between p-6">
-    <div class="flex justify-between items-center">
-      <h3 class="font-semibold text-lg">QR Kodni Skanerlang</h3>
-      <button onclick="stopScanner()" class="w-8 h-8 bg-white/10 rounded-full flex items-center justify-center text-gray-400">✕</button>
+  <div id="scannerModal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 hidden flex flex-col justify-between p-6">
+    <div class="flex justify-between items-center z-10">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping"></span>
+        <h3 class="font-extrabold text-base tracking-tight">QR Skaner Mashʼal</h3>
+      </div>
+      <button onclick="closeScanner()" class="w-10 h-10 ultra-glass rounded-full flex items-center justify-center text-gray-400 hover:text-white">✕</button>
     </div>
 
-    <div class="w-full max-w-sm mx-auto my-auto overflow-hidden rounded-3xl border border-white/20 shadow-2xl">
+    <div class="w-full max-w-sm mx-auto my-auto overflow-hidden rounded-3xl border border-white/20 shadow-2xl relative">
       <div id="reader"></div>
     </div>
 
-    <p class="text-center text-xs text-gray-400">Terminal ekranidagi QR kodni kvadrat ichiga kiriting</p>
+    <p class="text-center text-xs text-gray-400 z-10 font-medium">Kamerani Noutbuk ekranidagi AURA TERMINAL QR kodiga tuting</p>
   </div>
 
-  <!-- FaceID / To'lovni Tasdiqlash Modal -->
-  <div id="payModal" class="fixed inset-0 bg-black/95 backdrop-blur-2xl z-50 hidden flex flex-col justify-between p-6">
-    <div class="text-center pt-8">
-      <p class="text-xs text-gray-400 uppercase tracking-widest mb-1">Toʻlov soʻrovi</p>
-      <h2 id="modalAmount" class="text-4xl font-bold text-white mb-2">0 UZS</h2>
-      <p id="modalSession" class="text-xs text-blue-400 font-mono"></p>
+  <!-- FaceID Authorization Modal -->
+  <div id="payModal" class="fixed inset-0 bg-black/95 backdrop-blur-3xl z-50 hidden flex flex-col justify-between p-8">
+    
+    <div class="text-center pt-6 space-y-2">
+      <span class="text-[10px] font-bold px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 uppercase tracking-widest">Toʻlov Soʻrovi</span>
+      <h2 id="modalAmount" class="text-4xl font-black text-white font-mono tracking-tight pt-2">0 UZS</h2>
+      <p id="modalSession" class="text-xs text-gray-400 font-mono"></p>
     </div>
 
-    <!-- FaceID Animatsiyasi -->
+    <!-- FaceID Laser Animation -->
     <div class="my-auto text-center space-y-4">
-      <div class="w-24 h-24 border-2 border-blue-500/40 rounded-3xl mx-auto flex items-center justify-center relative overflow-hidden">
-        <svg class="w-12 h-12 text-blue-400 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+      <div class="w-28 h-28 border-2 border-cyan-500/30 rounded-3xl mx-auto flex items-center justify-center relative overflow-hidden bg-white/[0.02]">
+        <div class="absolute inset-x-0 h-1 faceid-scanner-line"></div>
+        <svg class="w-14 h-14 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
       </div>
-      <p class="text-xs text-gray-400">FaceID orqali autentifikatsiya</p>
+      <p class="text-xs text-gray-400 font-semibold tracking-wide">FaceID Avtorizatsiyasi Kutilmoqda</p>
     </div>
 
-    <div class="space-y-3 pb-4">
-      <button onclick="confirmPayment()" class="w-full py-4 bg-blue-600 hover:bg-blue-500 font-semibold rounded-2xl shadow-lg shadow-blue-600/30 transition text-white">
-        Toʻlovni tasdiqlash
+    <div class="space-y-3 pb-2">
+      <button onclick="confirmPayment()" class="w-full py-5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:opacity-95 font-extrabold text-base rounded-2xl shadow-xl shadow-emerald-500/25 transition active:scale-[0.98] text-white uppercase tracking-wider">
+        Toʻlovni Tasdiqlash
       </button>
-      <button onclick="cancelPayment()" class="w-full py-3 text-gray-400 text-sm">Bekor qilish</button>
+      <button onclick="cancelPayment()" class="w-full py-3.5 text-gray-400 text-xs font-semibold hover:text-white transition uppercase tracking-wider">
+        Bekor qilish
+      </button>
     </div>
   </div>
 
   <script>
     const channel = new BroadcastChannel('aura_pay_channel');
-    let html5QrcodeScanner = null;
-    let pendingSession = null;
+    let qrScanner = null;
+    let pendingData = null;
 
-    function startScanner() {
+    function openScanner() {
       document.getElementById('scannerModal').classList.remove('hidden');
-      html5QrcodeScanner = new Html5Qrcode("reader");
+      qrScanner = new Html5Qrcode("reader");
 
-      html5QrcodeScanner.start(
+      qrScanner.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { fps: 15, qrbox: { width: 240, height: 240 } },
         onScanSuccess
       ).catch(err => {
-        alert("Kamerani ochishda xatolik: " + err);
-        stopScanner();
+        alert("Kameraga ruxsat berilmadi yoki xatolik yuz berdi: " + err);
+        closeScanner();
       });
     }
 
-    function stopScanner() {
-      if (html5QrcodeScanner) {
-        html5QrcodeScanner.stop().then(() => {
+    function closeScanner() {
+      if (qrScanner) {
+        qrScanner.stop().then(() => {
           document.getElementById('scannerModal').classList.add('hidden');
         }).catch(() => {
           document.getElementById('scannerModal').classList.add('hidden');
@@ -131,39 +176,39 @@
       try {
         const data = JSON.parse(decodedText);
         if (data.sessionId && data.amount) {
-          pendingSession = data;
-          stopScanner();
+          pendingData = data;
+          closeScanner();
 
           document.getElementById('modalAmount').innerText = data.amount.toLocaleString('uz-UZ') + ' UZS';
-          document.getElementById('modalSession').innerText = 'ID: ' + data.sessionId;
+          document.getElementById('modalSession').innerText = 'Sessiya ID: ' + data.sessionId;
           document.getElementById('payModal').classList.remove('hidden');
         }
       } catch (e) {
-        // Shunchaki format mos kelmagan QR kodlar bo'lsa o'tkazib yuboradi
+        // Mos kelmaydigan QR koblarni o'tkazib yuboradi
       }
     }
 
     function confirmPayment() {
-      if (!pendingSession) return;
+      if (!pendingData) return;
 
-      // Cryptogramma va Device Account Number (DAN) yaratish simulyatsiyasi (Apple Pay xavfsizlik standarti)
-      const token = 'DAN-4092-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+      // Dinamik Token yaratish (Apple Pay xavfsizlik standarti)
+      const generatedToken = 'AURA-TOKEN-' + Math.random().toString(36).substring(2, 8).toUpperCase();
 
-      // Noutbukdagi Aura Terminalga to'g'ridan-to'g'ri signal yuborish
+      // Noutbuk terminaliga instant signal yuborish
       channel.postMessage({
         type: 'PAYMENT_SUCCESS',
-        sessionId: pendingSession.sessionId,
-        token: token,
+        sessionId: pendingData.sessionId,
+        token: generatedToken,
         timestamp: Date.now()
       });
 
       document.getElementById('payModal').classList.add('hidden');
-      alert("Toʻlov muvaffaqiyatli amalga oshirildi!");
-      pendingSession = null;
+      alert("Toʻlov muvaffaqiyatli tasdiqlandi va Terminalga uzatildi!");
+      pendingData = null;
     }
 
     function cancelPayment() {
-      pendingSession = null;
+      pendingData = null;
       document.getElementById('payModal').classList.add('hidden');
     }
   </script>
